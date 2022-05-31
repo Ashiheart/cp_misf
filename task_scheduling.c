@@ -1,167 +1,136 @@
+#include <stdio.h>
+#include <stdbool.h>
 
-static void update_processing_element(struct Task *assign, struct priority_list *head);
-
-static int strtod_next(char **str);
-
-static int is_task_standby(const struct Task *task);
-
-static int cmp(const void *lhs, const void *rhs);
+#include "function-timer.h"
+#include "task.h"
+#include "priority_list.h"
 
 
-void read_task(int n, struct Task task[n], struct priority_list plist[n])
+static bool is_scheduling_complete(int pe_num, struct Task *assign[pe_num], struct priority_list *head);
+
+static struct Task *assign_task(struct priority_list *head);
+
+static bool is_task_standby(const struct Task *task);
+
+static void show_processor_state(int time, int pe_num, struct Task *assign[pe_num]);
+
+static void simulate_scheduling_processor(struct priority_list *head, int pe_num);
+
+
+void cp_misf_prioritylist(FILE *fp, int pe_num)
 {
-    char str[12 * (n + 2)];
+    int task_len = 0;
 
-    char *ptr = NULL;
+    struct Task *task;
 
-    int predecessor_id;
+    function_timer(make_task(fp, &task_len, &task), "input");
 
-    for(int i = 0; i < n; i++) {
+    struct priority_list head = (struct priority_list) { .value = NULL, .next = NULL };
 
-        fgets(str, sizeof(str), stdin);
+    function_timer(make_priority_list(task_len, task, &head), "insert_sort");
 
-        ptr = str;
+    //show_critical_path(&head);
 
-        task[i].id               = strtod_next(&ptr);
-        task[i].processing_time  = strtod_next(&ptr);
-        task[i].predecessor_size = strtod_next(&ptr);
+    //show_plist(&head);
 
-        task[i].predecessor = (struct Task**)malloc(sizeof(struct Task*)*task[i].predecessor_size);
+    //show_task(task_len, task);
 
-        for(int j = 0; j < task[i].predecessor_size; j++) {
-            predecessor_id                   = strtod_next(&ptr);
-            task[i].predecessor[j]           = &task[predecessor_id];
-            task[predecessor_id].successors += 1;
-        }
-    }
+    function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
+    task_destructor(task_len, task);
+
+    plist_destructor(&head);
 }
 
-void export_task_graph(int n, struct Task task[n])
-{
-    FILE *fp = fopen("graph.gv", "w");
-    fprintf(fp, "digraph {\n");
-    for(int i = 0; i < n; i++) {
-        fprintf(fp, "%d [label = \"%d,%d\", shape = circle, overlap = false]\n", task[i].id, task[i].id, task[i].processing_time);
-    }
 
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < task[i].predecessor_size; j++) {
-            fprintf(fp, "%d -> %d\n", task[i].predecessor[j]->id, task[i].id);
+void simulate_scheduling_processor(struct priority_list *head, int pe_num)
+{
+    struct Task *assign[pe_num]; for(int i = 0; i < pe_num; i++) { assign[i] = NULL; }
+
+    bool HasCompletedTasks = true;
+
+    printf("time #"); for(int i = 0; i < pe_num; i++) printf("%5d", i);
+    printf("\n------"); for(int i = 0; i < pe_num; i++) printf("-----"); printf("\n");
+
+    for(int t = 1; !is_scheduling_complete(pe_num, assign, head); t++) {
+        // 割当
+        for(int i = 0; i < pe_num; i++) {
+            if(HasCompletedTasks && assign[i] == NULL) {
+                assign[i] = assign_task(head);
+                if(assign[i] == NULL) {
+                    HasCompletedTasks = false;
+                    break;
+                }
+            }
         }
-    }
-    fprintf(fp, "}\n");
-
-    fclose(fp);
-}
-
-void set_critical_path(int n, struct Task task[n])
-{
-    int candidate_path_len = 0;
-    for(int i = n - 1; i >= 0; i--) {
-        for(int j = 0; j < task[i].predecessor_size; j++) {
-            candidate_path_len = task[i].predecessor[j]->processing_time + task[i].cp_len;
-            if( task[i].predecessor[j]->cp_len <= candidate_path_len) {
-                task[i].predecessor[j]->cp_len  = candidate_path_len;
+        //描画
+        show_processor_state(t, pe_num, assign);
+        //更新
+        for(int i = 0; i < pe_num; i++) {
+            if(assign[i] != NULL) {
+                assign[i]->progress++;
+                if(assign[i]->progress == assign[i]->processing_time) {
+                    assign[i] = NULL;
+                    HasCompletedTasks = true;
+                }
             }
         }
     }
 }
 
-void show_scheduling_processor(struct priority_list *head, int pe_num)
+bool is_scheduling_complete(int pe_num, struct Task *assign[pe_num], struct priority_list *head)
 {
-    printf("time | PE0\tPE1\n");
-    printf("-----------------------\n");
+    if(head->next != NULL) {
+        return false;
+    }
 
-    struct Task *assign[pe_num];
-
-    for(int t = 0; t < 10; t++) {
-        for(int i = 0; i < pe_num; i++) {
-            update_processing_element(assign[i], head);
+    for(int i = 0; i < pe_num; i++) {
+        if(assign[i] != NULL) {
+            return false;
         }
     }
+
+    return true;
 }
 
-int is_task_standby(const struct Task *task)
+bool is_task_standby(const struct Task *task)
 {
     for(int i = 0; i < task->predecessor_size; i++) {
-        if(task->predecessor[i]->state != Complete) return 0;
+        if(task->predecessor[i]->processing_time - task->predecessor[i]->progress > 0) return false;
     }
 
-    return 1;
+    return true;
 }
 
-void update_processing_element(struct Task *assign, struct priority_list *head)
+struct Task *assign_task(struct priority_list *head)
+{  
+    struct Task *assign = NULL;
+    for(struct priority_list *ptr = head; ptr->next != NULL; ptr = ptr->next) {
+        if(is_task_standby(ptr->next->value)) {
+            assign = ptr->next->value;
+            ptr->next = ptr->next->next;
+            return assign;
+        }
+    }
+    return NULL;
+}
+
+void show_processor_state(int time, int pe_num, struct Task *assign[pe_num]) 
 {
-    if(assign == NULL || assign->state == Complete) {
-        for(struct priority_list *ptr = head; ptr != NULL; ptr = ptr->next) {
-            if(is_task_standby(ptr->value)) {
-                assign = ptr->next->value;
+    printf("%4d #", time);
+    for(int i = 0; i < pe_num; i++) {
+        if(assign[i] != NULL) {
+            if(assign[i]->progress == 0) {
+                printf("%5d", assign[i]->id);
+            } else if(assign[i]->processing_time - assign[i]->progress == 1) {
+                printf("%5s", "v");
+            } else {
+                printf("%5s", "|");
             }
-        }
-    } else {
-        assign->processing_time--;
-        if(assign->processing_time <= 0) {
-            assign->state = Complete;
+        } else {
+            printf("%5s", ".");
         }
     }
+    puts("");
 }
 
-int cmp(const void *lhs, const void *rhs)
-{
-    int val = ((struct Task*)rhs)->cp_len - ((struct Task*)lhs)->cp_len;
-
-    if(val != 0) {
-        return val;
-    } else {
-        return ((struct Task*)rhs)->successors - ((struct Task*)lhs)->successors;
-    }
-}
-
-void make_priority_list(int n, struct priority_list plist[n], struct priority_list *head)
-{
-    struct priority_list *tmp = NULL;
-
-    for(int i = n - 1; i >= 0; i--) {
-        for(struct priority_list *ptr = head; ptr != NULL; ptr = ptr->next) {
-            if(ptr->next == NULL || cmp(ptr->next->value, plist[i].value) >= 0) {
-                tmp = ptr->next;
-                ptr->next = &plist[i];
-                plist[i].next = tmp;
-                break;
-            }
-        }
-    }
-
-}
-
-int strtod_next(char **str)
-{
-    int num = 0;
-    char *endptr;
-
-    num = (int)strtol(*str, &endptr, 10);
-    *str = endptr;
-
-    return num;
-}
-
-void show_task(int n, struct Task task[n])
-{
-    for(int i = 0; i < n; i++) {
-        printf("id:%3d, time:%3d: pred:%3d\n", task[i].id, task[i].processing_time, task[i].predecessor_size);
-        printf("\t");
-        for(int j = 0; j < task[i].predecessor_size; j++) {
-            printf("%d ", task[i].predecessor[j]->id);
-        }
-        printf("\n");
-    }
-
-}
-
-void show_plist(struct priority_list *head)
-{
-    for(struct priority_list *ptr = head->next; ptr != NULL; ptr = ptr->next) {
-        printf("id:%3d, cp_len:%3d, after task:%3d\n", ptr->value->id, ptr->value->cp_len, ptr->value->successors);
-    }
-}

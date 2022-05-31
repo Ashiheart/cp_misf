@@ -47,7 +47,7 @@ struct priority_list
 void cp_misf_prioritylist(FILE *fp, int pe_num);
 
 /* .stgファイルをtaskに読み込み */
-void read_task(FILE *fp, int *n, struct Task *task);
+void make_task(FILE *fp, int *n, struct Task **task);
 
 void end_task(int n, struct Task task[n]);
 
@@ -95,9 +95,7 @@ int main(int argc, char *argv[])
 
     cp_misf_prioritylist(stdin, pe);
 
-
     //function_timer(qsort(task, task_len, sizeof(struct Task), cmp), "quick_sort");
-
 
     return 0;
 }
@@ -106,16 +104,9 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
 {
     int task_len = 0;
 
-    { 
-        char str[32]; 
-        if(fgets(str, 32, stdin) == NULL) exit(EXIT_FAILURE);
-        sscanf(str, "%d", &task_len); 
-    }
+    struct Task *task;
 
-
-    struct Task             task[task_len];
-
-    function_timer(read_task(fp, &task_len, task), "input");
+    function_timer(make_task(fp, &task_len, &task), "input");
 
     function_timer(set_critical_path(task_len, task), "cpath");
 
@@ -124,11 +115,11 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
 
     function_timer(make_priority_list(task_len, task, &head), "insert_sort");
 
-    show_critical_path(&head);
+    //show_critical_path(&head);
 
-    show_plist(&head);
+    //show_plist(&head);
 
-    show_task(task_len, task);
+    //show_task(task_len, task);
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
@@ -138,19 +129,23 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
     plist_destructor(&head);
 }
 
-void read_task(FILE *fp, int *n, struct Task *task)
+void make_task(FILE *fp, int *n, struct Task **task)
 {
-    char str[12 * (*n + 2)];
+    static const int Width = 12;
+
+    if(fscanf(fp, "%d", n) != 1) { exit(-1); } while(fgetc(fp) != '\n'); *n += 2;
+
+    *task = (struct Task*)malloc(sizeof(struct Task) * (*n));
+
+    char str[Width * (*n + 2)];
 
     char *ptr = NULL;
 
-    int predecessor_id;
-
     for(int i = 0; i < *n; i++) {
 
-        if((ptr = fgets(str, sizeof(str), stdin)) == NULL) exit(-1);
+        if((ptr = fgets(str, sizeof(str), fp)) == NULL) exit(-1);
 
-        task[i] = (struct Task) {
+        (*task)[i] = (struct Task) {
             .id                 = pop_strtoi(&ptr),
             .processing_time    = pop_strtoi(&ptr),
             .predecessor_size   = pop_strtoi(&ptr),
@@ -159,14 +154,14 @@ void read_task(FILE *fp, int *n, struct Task *task)
             .progress           = 0,
         };
 
-        task[i].predecessor = (struct Task**)malloc(sizeof(struct Task*)*task[i].predecessor_size);
+        (*task)[i].predecessor = (struct Task**)malloc(sizeof(struct Task*)*(*task)[i].predecessor_size);
 
-        for(int j = 0; j < task[i].predecessor_size; j++) {
-            predecessor_id                   = pop_strtoi(&ptr);
-            task[i].predecessor[j]           = &task[predecessor_id];
+        for(int j = 0; j < (*task)[i].predecessor_size; j++) {
+            (*task)[i].predecessor[j]    = &(*task)[pop_strtoi(&ptr)];
         }
     }
 
+    function_timer(set_critical_path(*n, *task), "cpath");
 }
 
 void task_destructor(int n, struct Task task[n])
@@ -174,7 +169,7 @@ void task_destructor(int n, struct Task task[n])
     for(int i = 0; i < n; i++) { 
         free(task[i].predecessor); 
     }
-    //free(task);
+    free(task);
 }
 
 void plist_destructor(struct priority_list *head)
@@ -328,6 +323,7 @@ void make_priority_list(int n, struct Task task[n], struct priority_list *head)
 
 }
 
+// 副作用あります
 int pop_strtoi(char **str)
 {
     int num = 0;
