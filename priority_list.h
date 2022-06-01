@@ -16,4 +16,3 @@ void plist_destructor(struct priority_list *head);
 void show_plist(struct priority_list *head);
 
 void show_critical_path(struct priority_list *head);
-

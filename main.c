@@ -1,8 +1,11 @@
 #include "task_scheduling.h"
+#include <stdlib.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    cp_misf_prioritylist(stdin, 4); 
+    int pe = argc == 2 ? (int)strtol(argv[1], NULL, 10) : 2;
+
+    cp_misf(stdin, pe);
 
     return 0;
 }

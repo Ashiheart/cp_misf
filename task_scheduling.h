@@ -6,3 +6,5 @@ void cp_misf_prioritylist(FILE *fp, int pe_num);
 
 void cp_misf_taskarray   (FILE *fp, int pe_num);
 
+void cp_misf(FILE *stg, int pe_num);
+

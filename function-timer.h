@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-//#define MEASURE_MODE
+#define MEASURE_MODE
 
 #ifdef MEASURE_MODE
 #define timer_print(str, start, end) \

@@ -54,14 +54,13 @@ void task_destructor(int n, struct Task task[n])
 void show_task(int n, struct Task task[n])
 {
     for(int i = 0; i < n; i++) {
-        printf("id:%3d, time:%3d: pred:%3d after:%3d", 
-                task[i].id, task[i].processing_time, task[i].predecessor_size, task[i].successors);
+        printf("id:%3d time:%3d: cp:%3d pred:%3d after:%3d", 
+                task[i].id, task[i].processing_time, task[i].cp_len, task[i].predecessor_size, task[i].successors);
         printf("\t");
         for(int j = 0; j < task[i].predecessor_size; j++) { printf("%d ", task[i].predecessor[j]->id);
         }
         printf("\n");
     }
-
 }
 
 void export_task_graph(int n, struct Task task[n], char *export_file_name)
