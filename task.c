@@ -40,7 +40,7 @@ void make_task(FILE *fp, int *n, struct Task **task)
         }
     }
 
-    function_timer(set_critical_path(*n, *task), "cpath");
+    set_critical_path(*n, *task);
 }
 
 void task_destructor(int n, struct Task task[n])

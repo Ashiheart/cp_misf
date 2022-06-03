@@ -7,5 +7,7 @@ int main(int argc, char *argv[])
 
     cp_misf_taskarray(stdin, pe);
 
+    fprintf(stderr, "\n");
+
     return 0;
 }

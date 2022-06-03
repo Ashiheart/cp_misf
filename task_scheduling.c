@@ -3,10 +3,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "function-timer.h"
 #include "task.h"
 #include "priority_list.h"
 
+#include "function-timer.h"
 
 static bool is_scheduling_complete(int pe_num, struct Task *assign[pe_num], struct priority_list *head);
 
@@ -41,11 +41,6 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
-    show_plist(&head);
-
-    show_task(task_len, task);
-
-
     task_destructor(task_len, task);
 
     plist_destructor(&head);
@@ -66,8 +61,6 @@ void cp_misf_taskarray(FILE *fp, int pe_num)
     function_timer(qsort_r(id_plist, task_len - 2, sizeof(int), cmp_r, task), "quick_sort");
 
     function_timer(simulate_scheduling_processor_taskarray(task_len, task, id_plist, pe_num), "scheduling");
-
-    show_task(task_len, task);
     
     task_destructor(task_len, task);
 }
