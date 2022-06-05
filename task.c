@@ -68,7 +68,7 @@ void export_task_graph(int n, struct Task task[n], char *export_file_name)
     FILE *fp = fopen(export_file_name, "w");
     fprintf(fp, "digraph {\n");
     for(int i = 0; i < n; i++) {
-        fprintf(fp, "%d [label = \"%d,%d\", shape = circle, overlap = false]\n", task[i].id, task[i].id, task[i].processing_time);
+        fprintf(fp, "%d [label = \"%d(%d)\", shape = circle, overlap = false, fontsize=16]\n", task[i].id, task[i].id, task[i].processing_time);
     }
 
     for(int i = 0; i < n; i++) {
