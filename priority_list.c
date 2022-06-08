@@ -41,6 +41,16 @@ void plist_destructor(struct priority_list *head)
     }
 }
 
+struct Task *plist_pop(struct priority_list *prev)
+{
+    struct priority_list *tar = prev->next;
+    struct Task *value = tar->value;
+
+    prev->next = prev->next->next;
+    free(tar);
+    return value;
+}
+
 void plist_show(struct priority_list *head)
 {
     for(struct priority_list *ptr = head->next; ptr != NULL; ptr = ptr->next) {

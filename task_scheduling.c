@@ -164,12 +164,9 @@ bool is_task_standby(const struct Task *task)
 
 struct Task *assign_task(struct priority_list *head)
 {  
-    struct Task *assign = NULL;
     for(struct priority_list *ptr = head; ptr->next != NULL; ptr = ptr->next) {
         if(is_task_standby(ptr->next->value)) {
-            assign = ptr->next->value;
-            ptr->next = ptr->next->next;
-            return assign;
+            return plist_pop(ptr);
         }
     }
     return NULL;
