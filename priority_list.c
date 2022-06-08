@@ -5,9 +5,9 @@
 
 static int cmp(const void *lhs, const void *rhs);
 
-static void show_critical_path_recursive(struct priority_list *tar);
+static void plist_show_cpath_recursive(struct priority_list *tar);
 
-void make_priority_list(int n, struct Task task[n], struct priority_list *head)
+void plist_make(int n, struct Task task[n], struct priority_list *head)
 {
     struct priority_list *tmp = NULL;
     struct priority_list *tar = NULL;
@@ -41,7 +41,7 @@ void plist_destructor(struct priority_list *head)
     }
 }
 
-void show_plist(struct priority_list *head)
+void plist_show(struct priority_list *head)
 {
     for(struct priority_list *ptr = head->next; ptr != NULL; ptr = ptr->next) {
         printf("id:%3d, pt:%3d, cp_len:%3d, after task:%3d\n", 
@@ -49,14 +49,14 @@ void show_plist(struct priority_list *head)
     }
 }
 
-void show_critical_path(struct priority_list *head)
+void plist_show_cpath(struct priority_list *head)
 {
     puts("id(critical_path, processing_time)");
-    show_critical_path_recursive(head->next);
+    plist_show_cpath_recursive(head->next);
     puts("");
 }
 
-void show_critical_path_recursive(struct priority_list *tar)
+void plist_show_cpath_recursive(struct priority_list *tar)
 {
     if(tar == NULL) return;
 
@@ -70,7 +70,7 @@ void show_critical_path_recursive(struct priority_list *tar)
 
     for(struct priority_list *ptr = tar; ptr != NULL; ptr = ptr->next) {
         if(ptr->value->cp_len == tar->value->cp_len - tar->value->processing_time) {
-            show_critical_path_recursive(ptr);
+            plist_show_cpath_recursive(ptr);
             return ;
         }
     }

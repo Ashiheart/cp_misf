@@ -8,7 +8,7 @@ static void set_critical_path(int n, struct Task task[n]);
 
 static int pop_strtoi(char **str);
 
-void make_task(FILE *fp, int *n, struct Task **task)
+void task_make(FILE *fp, int *n, struct Task **task)
 {
     static const int Width = 12;
 
@@ -51,7 +51,7 @@ void task_destructor(int n, struct Task task[n])
     free(task);
 }
 
-void show_task(int n, struct Task task[n])
+void task_show(int n, struct Task task[n])
 {
     for(int i = 0; i < n; i++) {
         printf("id:%3d time:%3d: cp:%3d pred:%3d after:%3d", 
@@ -63,7 +63,7 @@ void show_task(int n, struct Task task[n])
     }
 }
 
-void export_task_graph(int n, struct Task task[n], char *export_file_name)
+void task_export_graph(int n, struct Task task[n], char *export_file_name)
 {
     FILE *fp = fopen(export_file_name, "w");
     fprintf(fp, "digraph {\n");

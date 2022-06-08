@@ -7,9 +7,9 @@ int main(void)
 
     struct Task *task = NULL;
 
-    make_task(stdin, &n, &task);
+    task_make(stdin, &n, &task);
 
-    export_task_graph(n, task, "graph.gv");
+    task_export_graph(n, task, "graph.gv");
 
     task_destructor(n, task);
 }

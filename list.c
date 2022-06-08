@@ -47,24 +47,24 @@ struct priority_list
 void cp_misf_prioritylist(FILE *fp, int pe_num);
 
 /* .stgファイルをtaskに読み込み */
-void make_task(FILE *fp, int *n, struct Task **task);
+void task_make(FILE *fp, int *n, struct Task **task);
 
 void end_task(int n, struct Task task[n]);
 
-void make_priority_list(int n, struct Task task[n], struct priority_list *head);
+void plist_make(int n, struct Task task[n], struct priority_list *head);
 
 void simulate_scheduling_processor(struct priority_list *head, int pe_num);
 
 void simulate_scheduling_processor_array(int n, struct Task task[n], int pe_num);
 
 /* タスクグラフを画像に変換 */
-void export_task_graph(int n, struct Task task[n], char *export_file_name);
+void task_export_graph(int n, struct Task task[n], char *export_file_name);
 
-void show_task(int n, struct Task task[n]);
+void task_show(int n, struct Task task[n]);
 
-void show_plist(struct priority_list *head);
+void plist_show(struct priority_list *head);
 
-void show_critical_path(struct priority_list *head);
+void plist_show_cpath(struct priority_list *head);
 
 
 
@@ -80,7 +80,7 @@ static bool is_task_standby(const struct Task *task);
 
 static int cmp(const void *lhs, const void *rhs);
 
-static void show_critical_path_recursive(struct priority_list *tar);
+static void plist_show_cpath_recursive(struct priority_list *tar);
 
 static void show_processor_state(int time, int pe_num, struct Task *assign[pe_num]);
 
@@ -106,20 +106,20 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
 
     struct Task *task;
 
-    function_timer(make_task(fp, &task_len, &task), "input");
+    function_timer(task_make(fp, &task_len, &task), "input");
 
     function_timer(set_critical_path(task_len, task), "cpath");
 
 
     struct priority_list head = (struct priority_list) { .value = NULL, .next = NULL };
 
-    function_timer(make_priority_list(task_len, task, &head), "insert_sort");
+    function_timer(plist_make(task_len, task, &head), "insert_sort");
 
-    //show_critical_path(&head);
+    //plist_show_cpath(&head);
 
-    //show_plist(&head);
+    //plist_show(&head);
 
-    //show_task(task_len, task);
+    //task_show(task_len, task);
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
@@ -129,7 +129,7 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
     plist_destructor(&head);
 }
 
-void make_task(FILE *fp, int *n, struct Task **task)
+void task_make(FILE *fp, int *n, struct Task **task)
 {
     static const int Width = 12;
 
@@ -183,7 +183,7 @@ void plist_destructor(struct priority_list *head)
 }
 
 // ex) dot -Tpng graph.gv -o graph.png
-void export_task_graph(int n, struct Task task[n], char *export_file_name)
+void task_export_graph(int n, struct Task task[n], char *export_file_name)
 {
     FILE *fp = fopen(export_file_name, "w");
     fprintf(fp, "digraph {\n");
@@ -299,7 +299,7 @@ int cmp(const void *lhs, const void *rhs)
     }
 }
 
-void make_priority_list(int n, struct Task task[n], struct priority_list *head)
+void plist_make(int n, struct Task task[n], struct priority_list *head)
 {
     struct priority_list *tmp = NULL;
     struct priority_list *tar = NULL;
@@ -354,7 +354,7 @@ void show_processor_state(int time, int pe_num, struct Task *assign[pe_num])
     puts("");
 }
 
-void show_task(int n, struct Task task[n])
+void task_show(int n, struct Task task[n])
 {
     for(int i = 0; i < n; i++) {
         printf("id:%3d, time:%3d: pred:%3d after:%3d", 
@@ -367,7 +367,7 @@ void show_task(int n, struct Task task[n])
 
 }
 
-void show_plist(struct priority_list *head)
+void plist_show(struct priority_list *head)
 {
     for(struct priority_list *ptr = head->next; ptr != NULL; ptr = ptr->next) {
         printf("id:%3d, pt:%3d, cp_len:%3d, after task:%3d\n", 
@@ -375,14 +375,14 @@ void show_plist(struct priority_list *head)
     }
 }
 
-void show_critical_path(struct priority_list *head)
+void plist_show_cpath(struct priority_list *head)
 {
     puts("id(critical_path, processing_time)");
-    show_critical_path_recursive(head->next);
+    plist_show_cpath_recursive(head->next);
     puts("");
 }
 
-void show_critical_path_recursive(struct priority_list *tar)
+void plist_show_cpath_recursive(struct priority_list *tar)
 {
     if(tar == NULL) return;
 
@@ -396,7 +396,7 @@ void show_critical_path_recursive(struct priority_list *tar)
 
     for(struct priority_list *ptr = tar; ptr != NULL; ptr = ptr->next) {
         if(ptr->value->cp_len == tar->value->cp_len - tar->value->processing_time) {
-            show_critical_path_recursive(ptr);
+            plist_show_cpath_recursive(ptr);
             return ;
         }
     }

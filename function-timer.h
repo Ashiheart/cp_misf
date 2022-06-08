@@ -7,8 +7,8 @@
 #undef MEASURE_MODE
 
 //#define SIMPLE_MODE
-#define VALUE_ONLY_MODE
-//#define MEASURE_MODE
+//#define VALUE_ONLY_MODE
+#define MEASURE_MODE
 
 #ifdef SIMPLE_MODE
 #define function_timer(method, message) { \

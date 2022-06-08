@@ -9,10 +9,10 @@ struct priority_list
     struct priority_list*   next;
 };
 
-void make_priority_list(int n, struct Task task[n], struct priority_list *head);
+void plist_make(int n, struct Task task[n], struct priority_list *head);
 
 void plist_destructor(struct priority_list *head);
 
-void show_plist(struct priority_list *head);
+void plist_show(struct priority_list *head);
 
-void show_critical_path(struct priority_list *head);
+void plist_show_cpath(struct priority_list *head);

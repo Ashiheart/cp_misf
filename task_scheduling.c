@@ -33,11 +33,11 @@ void cp_misf_prioritylist(FILE *fp, int pe_num)
 
     struct Task *task;
 
-    function_timer(make_task(fp, &task_len, &task), "input");
+    function_timer(task_make(fp, &task_len, &task), "input");
 
     struct priority_list head = (struct priority_list) { .value = NULL, .next = NULL };
 
-    function_timer(make_priority_list(task_len, task, &head), "insert_sort");
+    function_timer(plist_make(task_len, task, &head), "insert_sort");
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
@@ -52,7 +52,7 @@ void cp_misf_taskarray(FILE *fp, int pe_num)
 
     struct Task *task;
 
-    function_timer(make_task(fp, &task_len, &task), "input");
+    function_timer(task_make(fp, &task_len, &task), "input");
 
     for(int i = 1; i < task_len - 1; i++) { task[i].progress = -1; }
 
@@ -225,5 +225,6 @@ int cmp(const void *lhs, const void *rhs)
 
 static int cmp_r(const void *lhs, const void *rhs, void *task)
 {
+    // cmp order by task->cp_len and task->successors
     return cmp(&((struct Task *)task)[*((int*)lhs)], &((struct Task *)task)[*((int*)rhs)]);
 }
