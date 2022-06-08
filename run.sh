@@ -1,24 +1,19 @@
-for size in {50,100,300,500}; do
-    dir="./log/raw/${size}/"
-    rm -rf $dir
-    mkdir -p $dir
-    arraydir="${dir}array/"
-    plistdir="${dir}plist/"
-    rm -rf "${dir}plist"
-    rm -rf "${dir}array"
-    mkdir "${dir}plist"
-    mkdir "${dir}array"
-    for f in ../stg/${size}/*.stg; do
-        for p in {4..32..4}; do
-            plist="${plistdir}$(basename ${f} .stg)_pe${p}_plist.log" 
-            array="${arraydir}$(basename ${f} .stg)_pe${p}_array.log" 
-            echo -n "" > ${plist}
-            for i in {1..10}; do
-                echo "$f $p" 
-                echo -n "$(basename ${f}) " >> "${plist}"
-                ./main_plist.out $p < $f 2>> "${plist}" > /dev/null
-                echo -n "$(basename ${f}) " >> "${array}"
-                ./main_task.out $p < $f 2>> "${array}" > /dev/null
+size="50"
+algo="plist array"
+pe="4 8 12 16"
+for s in $size; do
+    for a in $algo; do
+        dir="../log/raw/${s}/${a}/"
+        mkdir -p ${dir}
+        for f in ../stg/${s}/*.stg; do
+            for p in $pe; do
+                log="${dir}$(basename ${f} .stg)_pe${p}_${a}.log"
+                echo -n "" > ${log}
+                echo "$s $a $(basename ${f} .stg) $p" 
+                for i in {1..10}; do
+                    echo -n "$(basename ${f}) " >> "${log}"
+                    "./${a}.out" $p < $f 2>> "${log}" > /dev/null
+                done
             done
         done
     done
