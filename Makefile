@@ -1,9 +1,6 @@
 CFLAGS = -Wall -O3
 
-build: main.out array.out plist.out
-
-main.out: main.c task_scheduling.o task.o priority_list.o function-timer.h
-	gcc main.c task_scheduling.o task.o priority_list.o -o main.out -Wall -O3
+build: array.out plist.out
 
 array.out: array.c task_scheduling.o task.o priority_list.o function-timer.h
 	gcc array.c task_scheduling.o task.o priority_list.o -o array.out -Wall -O3
