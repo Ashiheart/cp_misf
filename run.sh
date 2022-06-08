@@ -1,6 +1,6 @@
-size="50"
+size="50 100 300 500"
 algo="plist array"
-pe="4 8 12 16"
+pe="4"
 for s in $size; do
     for a in $algo; do
         dir="../log/raw/${s}/${a}/"
