@@ -11,6 +11,8 @@ struct priority_list
 
 void plist_make(int n, struct Task task[n], struct priority_list *head);
 
+void plist_insertion_sort(int n, struct Task task[n], struct priority_list *head);
+
 void plist_destructor(struct priority_list *head);
 
 struct Task *plist_pop(struct priority_list *ptr);

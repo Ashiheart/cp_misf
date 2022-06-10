@@ -1,4 +1,4 @@
-size="50"
+size="5000"
 algo="plist"
 pe="4"
 for s in $size; do

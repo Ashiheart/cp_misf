@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static void set_critical_path(int n, struct Task task[n]);
-
 static int pop_strtoi(char **str);
 
 void task_make(FILE *fp, int *n, struct Task **task)
@@ -39,8 +37,6 @@ void task_make(FILE *fp, int *n, struct Task **task)
             (*task)[i].predecessor[j]    = &(*task)[pop_strtoi(&ptr)];
         }
     }
-
-    set_critical_path(*n, *task);
 }
 
 void task_destructor(int n, struct Task task[n])

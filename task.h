@@ -20,6 +20,8 @@ void task_make(FILE *fp, int *n, struct Task **task);
 
 void task_destructor(int n, struct Task task[n]);
 
+void set_critical_path(int n, struct Task task[n]);
+
 void task_show(int n, struct Task task[n]);
 
 // ex) dot -Tpng graph.gv -o graph.png

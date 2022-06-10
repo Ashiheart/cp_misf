@@ -29,9 +29,11 @@ static int cmp_r(const void *lhs, const void *rhs, void *task);
 
 void cp_misf_prioritylist(int task_len, struct Task *task, int pe_num)
 {
+    set_critical_path(task_len, task);
+
     struct priority_list head = (struct priority_list) { .value = NULL, .next = NULL };
 
-    function_timer(plist_make(task_len, task, &head), "insert_sort");
+    function_timer(plist_make(task_len, task, &head), "quick_sort");
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
@@ -42,6 +44,8 @@ void cp_misf_prioritylist(int task_len, struct Task *task, int pe_num)
 
 void cp_misf_taskarray(int task_len, struct Task *task, int pe_num)
 {
+    set_critical_path(task_len, task);
+
     for(int i = 1; i < task_len - 1; i++) { task[i].progress = -1; }
 
     int id_plist[task_len - 2]; for(int i = 0; i < task_len - 2; i++) { id_plist[i] = i + 1; }
@@ -52,21 +56,6 @@ void cp_misf_taskarray(int task_len, struct Task *task, int pe_num)
     
     task_destructor(task_len, task);
 }
-
-void cp_misf(FILE *stg, int pe_num)
-{
-    int task_len = 0;
-    
-    struct Task *task = NULL;
-
-    task_make(stg, &task_len, &task);
-
-    cp_misf_prioritylist(task_len, task, pe_num);
-
-    //cp_misf_taskarray(task_len, task, pe);
-}
-
-
 
 void simulate_scheduling_processor_taskarray(int n, struct Task task[n], int *plist_index, int pe_num)
 {
@@ -214,7 +203,7 @@ int cmp(const void *lhs, const void *rhs)
     }
 }
 
-static int cmp_r(const void *lhs, const void *rhs, void *task)
+int cmp_r(const void *lhs, const void *rhs, void *task)
 {
     // cmp order by task->cp_len and task->successors
     return cmp(&((struct Task *)task)[*((int*)lhs)], &((struct Task *)task)[*((int*)rhs)]);

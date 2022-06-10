@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 
 #include "priority_list.h"
@@ -5,9 +6,36 @@
 
 static int cmp(const void *lhs, const void *rhs);
 
+static int cmp_r(const void *lhs, const void *rhs, void *task);
+
 static void plist_show_cpath_recursive(struct priority_list *tar);
 
+
 void plist_make(int n, struct Task task[n], struct priority_list *head)
+{
+    int plist_size = n - 2;
+
+    int id_plist[plist_size];
+
+    for(int i = 0; i < plist_size; i++) { id_plist[i] = i + 1; }
+
+    qsort_r(id_plist, plist_size, sizeof(int), cmp_r, task);
+
+    struct priority_list *tar = NULL;
+
+    struct priority_list *tail = head;
+
+    for(int i = 0; i < plist_size; i++, tail = tail->next) {
+
+        tar  = (struct priority_list*)malloc(sizeof(struct priority_list));
+
+        *tar = (struct priority_list) { .value = &task[id_plist[i]], .next = NULL };
+
+        tail->next = tar;
+    }
+}
+
+void plist_insertion_sort(int n, struct Task task[n], struct priority_list *head)
 {
     struct priority_list *tmp = NULL;
     struct priority_list *tar = NULL;
@@ -34,8 +62,7 @@ void plist_make(int n, struct Task task[n], struct priority_list *head)
 void plist_destructor(struct priority_list *head)
 {
     struct priority_list *next;
-    for(struct priority_list *ptr = head->next; ptr != NULL; ptr = next)
-    {
+    for(struct priority_list *ptr = head->next; ptr != NULL; ptr = next) {
         next = ptr->next;
         free(ptr);
     }
@@ -98,4 +125,9 @@ int cmp(const void *lhs, const void *rhs)
     }
 }
 
+int cmp_r(const void *lhs, const void *rhs, void *task)
+{
+    // cmp order by task->cp_len and task->successors
+    return cmp(&((struct Task *)task)[*((int*)lhs)], &((struct Task *)task)[*((int*)rhs)]);
+}
 
