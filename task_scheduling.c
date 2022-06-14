@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#define TIMER_DEBUG
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>

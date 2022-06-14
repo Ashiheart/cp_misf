@@ -11,11 +11,12 @@ for s in $size; do
         for f in ../stg/${s}/*.stg; do
             for p in $pe; do
                 log="${dir}$(basename ${f} .stg)_pe${p}_${a}.log"
-                echo -n "" > ${log}
+                echo -n "" > $log
                 echo "$s $a $(basename ${f} .stg) $p" 
                 for i in {1..10}; do
-                    echo -n "$(basename ${f}) " >> "${log}"
-                    "./${a}.out" $p < $f 2>> "${log}" > /dev/null
+                    echo -n "$(basename ${f}) " >> $log
+                    "./${a}.out" $p < $f 2>> $log > /dev/null
+                    echo "" >> $log
                 done
             done
         done
@@ -36,6 +37,7 @@ for s in $size; do
                 for i in {1..10}; do
                     echo -n "$(basename ${f}) " >> "${log}"
                     "./${a}.out" $p < $f 2>> "${log}" > /dev/null
+                    echo "" >> $log
                 done
             done
         done
