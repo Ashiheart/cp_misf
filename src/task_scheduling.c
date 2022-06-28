@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define TIMER_DEBUG
+#define TIMER_VALUE_ONLY
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -34,7 +34,7 @@ void cp_misf_prioritylist(int task_len, struct Task *task, int pe_num)
 
     struct priority_list head = (struct priority_list) { .value = NULL, .next = NULL };
 
-    function_timer(plist_make(task_len, task, &head), "quick_sort");
+    function_timer(plist_make(task_len, task, &head), "make_plist");
 
     function_timer(simulate_scheduling_processor(&head, pe_num), "scheduling");
 
