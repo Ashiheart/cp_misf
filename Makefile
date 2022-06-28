@@ -13,12 +13,12 @@ test.out: test.c task_scheduling.o task.o priority_list.o
 	gcc test.c task_scheduling.o task.o priority_list.o -o test.out $(CFLAGS) 
 
 task_scheduling.o: task_scheduling.c function-timer.h
-	gcc -c task_scheduling.c $(CFLAGS)
+	gcc -c task_scheduling.c $(CFLAGS) 
 
 task.o: task.c function-timer.h
 	gcc -c task.c $(CFLAGS)
 
 priority_list.o: priority_list.c function-timer.h
-	gcc -c priority_list.c $(CFLAGS)
+	gcc -c priority_list.c $(CFLAGS) 
 
-clean:; rm -rf *.o *.out dump*
+clean:; rm -rf *.o *.out

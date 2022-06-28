@@ -1,6 +1,6 @@
 *.o
 *.out
-log*/
 *.log
 *.png
 dump*
+out/

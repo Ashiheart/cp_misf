@@ -1,7 +1,9 @@
 #size="50 100 300 500 1000 1500 2000 2500 3000 3500 4000 5000"
 #algo="array plist"
 #pe="1 2 3 4 8 12 16"
-size="50"
+stg="../stg"
+log="../log/raw"
+size="5000"
 algo="array plist"
 pe="4"
 for s in $size; do
@@ -15,7 +17,7 @@ for s in $size; do
                 echo "$s $a $(basename ${f} .stg) $p" 
                 for i in {1..10}; do
                     echo -n "$(basename ${f}) " >> $log
-                    "./${a}.out" $p < $f 2>> $log > /dev/null
+                    "simu/${a}.out" $p < $f 2>> $log > /dev/null
                     echo "" >> $log
                 done
             done
@@ -36,7 +38,7 @@ for s in $size; do
                 echo "$s $a $(basename ${f} .stg) $p" 
                 for i in {1..10}; do
                     echo -n "$(basename ${f}) " >> "${log}"
-                    "./${a}.out" $p < $f 2>> "${log}" > /dev/null
+                    "simu/${a}.out" $p < $f 2>> "${log}" > /dev/null
                     echo "" >> $log
                 done
             done
