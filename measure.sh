@@ -17,7 +17,7 @@ for s in $size; do
                 echo "$s $a $(basename ${f} .stg) $p" 
                 for i in {1..10}; do
                     echo -n "$(basename ${f}) " >> $log
-                    "simu/${a}.out" $p < $f 2>> $log > /dev/null
+                    "src/${a}.out" $p < $f 2>> $log > /dev/null
                     echo "" >> $log
                 done
             done
@@ -38,7 +38,7 @@ for s in $size; do
                 echo "$s $a $(basename ${f} .stg) $p" 
                 for i in {1..10}; do
                     echo -n "$(basename ${f}) " >> "${log}"
-                    "simu/${a}.out" $p < $f 2>> "${log}" > /dev/null
+                    "src/${a}.out" $p < $f 2>> "${log}" > /dev/null
                     echo "" >> $log
                 done
             done

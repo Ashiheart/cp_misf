@@ -15,7 +15,12 @@ int main(int argc, char *argv[])
 
     task_make(stdin, &task_len, &task);
 
-    function_timer(cp_misf_prioritylist(task_len, task, pe), "cp/misf");
+    function_timer(
+            set_critical_path(task_len, task);
+            cp_misf_taskarray(task_len, task, pe),
+            "cp/misf");
+
+    task_destructor(task_len, task);
 
     return 0;
 }
